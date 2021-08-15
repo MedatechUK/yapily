@@ -124,7 +124,7 @@ class Load:
         self.config = {} ## Hold the configuration
         self.data = {} ## Hold the oData Commands
         self.patch = {} ## Hold the oData PATCH Commands
-        self.BubbleID = str(uuid.uuid4())
+        self.BubbleID = str(uuid.uuid4()) ## The transaction identifier
         self.url = '/odata/priority/{}/{}/ZODA_TRANS'.format(constants.tabulaini , constants.Environment)
         self.headers = { 
             'Authorization' : 'Basic %s' %  b64encode(bytearray(constants.ouser + ":" + constants.opass,'ascii')).decode("ascii") ,

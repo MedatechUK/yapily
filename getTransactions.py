@@ -13,7 +13,6 @@ from yapily import ConsentsApi
 from http.client import HTTPSConnection
 from base64 import b64encode
 
-
 def main():
 
     configuration = Configuration()
