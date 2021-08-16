@@ -5,8 +5,8 @@ CALLBACK_URL = "https://display-parameters.herokuapp.com/" # Add a callback
 APPLICATION_USER_ID = "python-sdk@yapily.com"
 INSTITUTION_ID = "modelo-sandbox" # Replace this with any institution Id that exists in your Yapily application
 
-oDataHost ="walrus.ntsa.uk"
+oDataHost ="TOUCHSTONE.MEDATECHUK.COM"
 tabulaini ="tabula.ini"
-ouser ="apiuser"
-opass ="123456"
-Environment = "wlnd"
+ouser ="FodeS"
+opass ="desire-07"
+Environment = "live"

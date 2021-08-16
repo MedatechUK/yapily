@@ -171,8 +171,6 @@ class Load:
                 self.data['ZODA_LOAD_SUBFORM'][-1][p.name] = p.value  
         
         ## Build PATCH request body  
-        self.data['TYPENAME'] = kwargs['ltype']      
-        self.patch['BUBBLEID'] = self.BubbleID
         self.patch['COMPLETE'] = "Y"
 
     ##                
@@ -310,12 +308,11 @@ class Load:
         
         ## TODO: error handling
         data = json.loads(res.read()) 
-        print(data)
 
-        print("PATCHing to [{}] ... ".format(constants.oDataHost))
-        c.request( 'PATCH', self.url , headers=self.headers, body=json.dumps(self.patch) )
+        print("PATCHing to [{}] ... ".format(constants.oDataHost))        
+        purl = self.url + "(BUBBLEID='{}',LOADTYPE={})".format(data['BUBBLEID'],data['LOADTYPE'])
+        c.request( 'PATCH', purl, headers=self.headers, body=json.dumps(self.patch) )
         res = c.getresponse()
         
         ## TODO: error handling      
-        data = json.loads(res.read()) 
-        print(data)
+        

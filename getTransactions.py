@@ -59,7 +59,7 @@ def main():
             'Authorization' : 'Basic %s' %  b64encode(bytearray(constants.APPLICATION_ID + ":" + constants.APPLICATION_SECRET,'ascii')).decode("ascii") ,
             'Consent' : '%s' % consent_token
         }
-        c.request('GET', '/accounts/'+ accounts.data[0].id +'/transactions', headers=headers)                        
+        c.request('GET', '/accounts/'+ accounts.data[0].id +'/transactions/?limit=1', headers=headers)                        
         
         l = odata.Load(
             ltype = "TST",
