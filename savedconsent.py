@@ -29,7 +29,7 @@ def main():
         'Authorization' : 'Basic %s' %  b64encode(bytearray(constants.APPLICATION_ID + ":" + constants.APPLICATION_SECRET,'ascii')).decode("ascii") ,
         'Consent' : '%s' % constants.consent
     }
-    c.request('GET', '/accounts/'+ accounts.data[0].id +'/transactions/?limit=1&from=2021-07-01', headers=headers)                        
+    c.request('GET', '/accounts/'+ accounts.data[0].id +'/transactions/?limit=2&from=2021-07-01', headers=headers)                        
     
     l = odata.Load(
         ltype = "TST", ## The loading type identifier

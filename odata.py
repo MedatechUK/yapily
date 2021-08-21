@@ -25,6 +25,7 @@
 ##  opass ="123456"
 ##  Environment = "wlnd"
 
+from datetime import datetime
 import sys
 import json
 from types import SimpleNamespace
@@ -34,6 +35,8 @@ from http.client import HTTPSConnection
 from base64 import b64encode
 
 import constants
+
+import PriDate
 
 class oRecord:
     ## Ctor
@@ -108,6 +111,8 @@ class Prop:
             self.type = "TEXT" + parent.nexttext()
         elif type == int:            
             self.type = "INT" + parent.nextint()
+        elif type == datetime:            
+            self.type = "INT" + parent.nextint()            
         elif type == bool:
             self.type = "CHAR" + parent.nextbool()           
         else:
@@ -150,7 +155,7 @@ class Load:
                 self.json = json.loads(kwargs[arg].read(), object_hook=lambda d: SimpleNamespace(**d))                
         
         ## Recurse through data to create config
-        print(self.json)
+        ## print(self.json)
         self.makeConfig(self.json, 'root')           
         
         ## Write config (if missing)
@@ -218,28 +223,32 @@ class Load:
                 # If it's not a namespace or list      
                 if type(value) is not SimpleNamespace and type(value) is not list:
                     # Add the column at this location
-                    self.Add(path).props.append(Prop(property , type(value), self.Add(path)))                
+                    if PriDate.isDate(value):
+                        # If the value is a date then initialise with data value
+                        self.Add(path).props.append(Prop(property , type(datetime.now()), self.Add(path)))                
+                    else:
+                        self.Add(path).props.append(Prop(property , type(value), self.Add(path)))                   
 
-            for property, value in vars(x).items(): 
-                # Excluded?
-                if not property in self.ex:            
-                    th = path + "." + property           
-                    # IS it a namespace? 
-                    if type(value) is SimpleNamespace:              
+        for property, value in vars(x).items(): 
+            # Excluded?
+            if not property in self.ex:            
+                th = path + "." + property           
+                # IS it a namespace? 
+                if type(value) is SimpleNamespace:              
+                    if th not in rt:
+                        rt.append(th)            
+                    self.makeConfig(value, th)
+                
+        for property, value in vars(x).items():       
+            # Excluded?
+            if not property in self.ex:
+                th = path + "." + property  
+                # IS it a List?
+                if type(value) is list:
+                    for i in value:             
                         if th not in rt:
-                            rt.append(th)            
-                        self.makeConfig(value, th)
-                    
-            for property, value in vars(x).items():       
-                # Excluded?
-                if not property in self.ex:
-                    th = path + "." + property  
-                    # IS it a List?
-                    if type(value) is list:
-                        for i in value:             
-                            if th not in rt:
-                                rt.append(th)                    
-                            self.makeConfig(i, th) 
+                            rt.append(th)                    
+                        self.makeConfig(i, th) 
 
     ## Write the config file
     def writeConfig(self , fn):
@@ -285,8 +294,11 @@ class Load:
                     self.odata.append(oRecord(self.rt(path) , self.line))            
 
                 for property, value in vars(self.configRows(path)).items():
-                    if property == p:                        
-                        self.odata[-1].oProps.append(oProp(value,v))                                    
+                    if property == p:                   
+                        if PriDate.isDate(v):
+                            self.odata[-1].oProps.append(oProp(value,PriDate.IntDate(v)))
+                        else:
+                            self.odata[-1].oProps.append(oProp(value,v))
 
         if not p in self.ex:
             ## Increment line counter if it's a new line
@@ -332,8 +344,7 @@ class Load:
         )
         res = c.getresponse()    
         if res.status == 201: # Created
-            data = json.loads(res.read()) 
-            ##print(data)
+            data = json.loads(res.read())             
             print("PATCHing to [{}] ... ".format(constants.oDataHost))                    
             c.request( 
                 'PATCH', 
