@@ -131,7 +131,8 @@ class Load:
             'Content-Type': 'application/json',
             "User-Agent": "MedatechUK Python Client",
         }
-        self.json = {}
+        self.json = {} # The json data from file/object
+        self.ex = kwargs['ex'] # The excluded namespaces / columns
         
         ## Determine data source
         for arg in kwargs.keys():
@@ -148,6 +149,7 @@ class Load:
                 self.json = json.loads(kwargs[arg].read(), object_hook=lambda d: SimpleNamespace(**d))                
         
         ## Recurse through data to create config
+        print(self.json)
         self.makeConfig(self.json, 'root')           
         
         ## Write config (if missing)
@@ -196,6 +198,7 @@ class Load:
         for r in self.records: 
             if r.name == path:
                 return r.rt
+        return -1
 
     ## Return the property
     def prop(self, rt, name, v):
@@ -208,25 +211,34 @@ class Load:
     ## Recurse json to create config data
     def makeConfig(self, x, path):
         rt = []    
-        for property, value in vars(x).items():         
-            if type(value) is not SimpleNamespace and type(value) is not list:
-                self.Add(path).props.append(Prop(property , type(value), self.Add(path)))                
+        for property, value in vars(x).items():  
+            # Excluded?
+            if not property in self.ex:             
+                # If it's not a namespace or list      
+                if type(value) is not SimpleNamespace and type(value) is not list:
+                    # Add the column at this location
+                    self.Add(path).props.append(Prop(property , type(value), self.Add(path)))                
 
-        for property, value in vars(x).items(): 
-            th = path + "." + property            
-            if type(value) is SimpleNamespace:              
-                if th not in rt:
-                    rt.append(th)            
-                self.makeConfig(value, th)
-                
-        for property, value in vars(x).items():       
-            if property != "transactionInformation":
-                th = path + "." + property  
-                if type(value) is list:
-                    for i in value:             
+            for property, value in vars(x).items(): 
+                # Excluded?
+                if not property in self.ex:            
+                    th = path + "." + property           
+                    # IS it a namespace? 
+                    if type(value) is SimpleNamespace:              
                         if th not in rt:
-                            rt.append(th)                    
-                        self.makeConfig(i, th) 
+                            rt.append(th)            
+                        self.makeConfig(value, th)
+                    
+            for property, value in vars(x).items():       
+                # Excluded?
+                if not property in self.ex:
+                    th = path + "." + property  
+                    # IS it a List?
+                    if type(value) is list:
+                        for i in value:             
+                            if th not in rt:
+                                rt.append(th)                    
+                            self.makeConfig(i, th) 
 
     ## Write the config file
     def writeConfig(self , fn):
@@ -249,6 +261,14 @@ class Load:
                 with open(fn, 'w') as f:
                     json.dump(rw, f)                     
 
+    def configRows(self , path):
+        for property, value in vars(self.config).items():              
+            for property, value in vars(value).items():
+                if property == 'row':
+                    for ROWID, value in vars(value).items():
+                        if int(ROWID) == int(self.rt(path)):
+                            return value
+
     ## Parse the data using the config
     def parse(self , x , path):
 
@@ -256,43 +276,43 @@ class Load:
         addline = False
         
         for p, v in vars(x).items():    
-            ## Is dict or list?    
-            if type(v) is not SimpleNamespace and type(v) is not list:
+            ## Not namespace or list - a column    
+            if type(v) is not SimpleNamespace and type(v) is not list and not p in self.ex:
                 if not addline:
-                    ## Create new line if one doesn't exist
+                    ## Create new oRecord in the oData, if one doesn't exist
                     addline = True
                     self.odata.append(oRecord(self.rt(path) , self.line))            
 
-                for property, value in vars(self.config).items():             
-                    for property, value in vars(value).items():
-                        if property == 'row':
-                            for property, value in vars(value).items():
-                                if int(property) == int(self.rt(path)):
-                                    for property, value in vars(value).items():
-                                        if p == property:
-                                            self.odata[-1].oProps.append(oProp(value,v))                                    
+                for property, value in vars(self.configRows(path)).items():
+                    if property == p:                        
+                        self.odata[-1].oProps.append(oProp(value,v))                                    
 
-        ## Increment line counter if it's a new line
-        if addline:
-            self.line += 1
-        
-        for property, value in vars(x).items():         
-            if property != "transactionInformation":
-                th = path + "." + property            
+        if not p in self.ex:
+            ## Increment line counter if it's a new line
+            if addline:
+                self.line += 1
+                
+        for property, value in vars(x).items():   
+            # Excluded?
+            if not property in self.ex:                       
+                th = path + "." + property    
+                # Am I a namespace?        
                 if type(value) is SimpleNamespace:              
                     if th not in rt:
                         rt.append(th)            
                     self.parse(value, th)
                 
-        for property, value in vars(x).items(): 
-            if property != "transactionInformation":        
+        for property, value in vars(x).items():      
+            # Excluded?
+            if not property in self.ex:                 
                 th = path + "." + property  
+                # Am I a list?        
                 if type(value) is list:
                     for i in value:             
                         if th not in rt:
                             rt.append(th)                    
                         self.parse(i, th)
-    
+        
     ## Save the odata to a file
     def save(self , fn):
         print("Saving to [{}] ... ".format(fn))
@@ -305,14 +325,18 @@ class Load:
         c = HTTPSConnection(constants.oDataHost)
         c.request( 'POST', self.url , headers=self.headers, body=json.dumps(self.data) )
         res = c.getresponse()
-        
-        ## TODO: error handling
-        data = json.loads(res.read()) 
+        ## print(res)
 
-        print("PATCHing to [{}] ... ".format(constants.oDataHost))        
-        purl = self.url + "(BUBBLEID='{}',LOADTYPE={})".format(data['BUBBLEID'],data['LOADTYPE'])
-        c.request( 'PATCH', purl, headers=self.headers, body=json.dumps(self.patch) )
-        res = c.getresponse()
-        
-        ## TODO: error handling      
-        
+        if res.status == 201: #created
+            data = json.loads(res.read()) 
+            ##print(data)
+            print("PATCHing to [{}] ... ".format(constants.oDataHost))        
+            purl = self.url + "(BUBBLEID='"+ data['BUBBLEID'] + "',LOADTYPE=" + str(data['LOADTYPE']) + ")"
+            ## print(purl)
+            c.request( 'PATCH', purl, headers=self.headers, body=json.dumps(self.patch) )
+            res = c.getresponse()
+            
+            ## TODO: error handling  
+
+        else:             
+            print(self.data)
