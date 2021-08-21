@@ -1,1 +1,56 @@
-{"TYPENAME": "TST", "BUBBLEID": "45721785-2246-4d82-9778-c602a3a82bd4", "ZODA_LOAD_SUBFORM": [{"RECORDTYPE": "1", "TEXT1": "6852f0d8-8def-4373-972f-c1a45fbbc514", "TEXT2": "2021-08-21T14:19:25.339Z", "TEXT3": "2021-08-21T14:19:25.339Z", "TEXT4": "2021-08-21T14:19:25.339Z", "TEXT5": "BOOKED", "REAL1": -45.0, "TEXT6": "GBP", "TEXT7": "8", "TEXT8": "test 54"}, {"RECORDTYPE": "2", "REAL1": -45.0, "TEXT1": "GBP"}, {"RECORDTYPE": "3", "TEXT1": "PMNT", "TEXT2": "Payments"}, {"RECORDTYPE": "4", "TEXT1": "ICDT", "TEXT2": "Issued Credit Transfers"}, {"RECORDTYPE": "5", "TEXT1": "DMCT", "TEXT2": "Domestic Credit Transfer"}, {"RECORDTYPE": "6", "TEXT1": "PMT", "TEXT2": "modelo-sandbox"}, {"RECORDTYPE": "7", "TEXT1": "CLOSING_AVAILABLE"}, {"RECORDTYPE": "8", "REAL1": 53.12, "TEXT1": "GBP"}, {"RECORDTYPE": "9", "TEXT1": "5c9de4af460dc902038a7025851d4bed.1"}]}
+{
+    "TYPENAME": "TST",
+    "BUBBLEID": "a4804e32-4bba-403f-81ef-08080cae22be",
+    "ZODA_LOAD_SUBFORM": [
+        {
+            "RECORDTYPE": "1",
+            "TEXT1": "917e32a4-51ef-48f7-be49-2730e57c195b",
+            "TEXT2": "2021-08-21T14:28:02.74Z",
+            "TEXT3": "2021-08-21T14:28:02.74Z",
+            "TEXT4": "2021-08-21T14:28:02.74Z",
+            "TEXT5": "BOOKED",
+            "REAL1": -60.0,
+            "TEXT6": "GBP",
+            "TEXT7": "c",
+            "TEXT8": "test 55"
+        },
+        {
+            "RECORDTYPE": "2",
+            "REAL1": -60.0,
+            "TEXT1": "GBP"
+        },
+        {
+            "RECORDTYPE": "3",
+            "TEXT1": "PMNT",
+            "TEXT2": "Payments"
+        },
+        {
+            "RECORDTYPE": "4",
+            "TEXT1": "ICDT",
+            "TEXT2": "Issued Credit Transfers"
+        },
+        {
+            "RECORDTYPE": "5",
+            "TEXT1": "DMCT",
+            "TEXT2": "Domestic Credit Transfer"
+        },
+        {
+            "RECORDTYPE": "6",
+            "TEXT1": "PMT",
+            "TEXT2": "modelo-sandbox"
+        },
+        {
+            "RECORDTYPE": "7",
+            "TEXT1": "CLOSING_AVAILABLE"
+        },
+        {
+            "RECORDTYPE": "8",
+            "REAL1": 21.88,
+            "TEXT1": "GBP"
+        },
+        {
+            "RECORDTYPE": "9",
+            "TEXT1": "3a7cc2bb1462fa5de24c9ac5a94dc7d1.1"
+        }
+    ]
+}
