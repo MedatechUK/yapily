@@ -7,7 +7,6 @@
 ## o = object       ) Or
 ## c = config       MANDATORY: created if missing 
 ## ltype = LoadType MANDATORY: the type of loading
-## ex = exclude     Exlude namespaces from parse
 ## 
 ## Usage:
 ## l = Load(
@@ -324,30 +323,20 @@ class Load:
     def post(self):
         print("POSTing to [{}] ... ".format(constants.oDataHost))
         c = HTTPSConnection(constants.oDataHost)
-        c.request( 
-            'POST', 
-            self.url , 
-            headers=self.headers, 
-            body=json.dumps(self.data) 
-        )
-        res = c.getresponse()    
-        if res.status == 201: # Created
+        c.request( 'POST', self.url , headers=self.headers, body=json.dumps(self.data) )
+        res = c.getresponse()
+        ## print(res)
+
+        if res.status == 201: #created
             data = json.loads(res.read()) 
             ##print(data)
-            print("PATCHing to [{}] ... ".format(constants.oDataHost))                    
-            c.request( 
-                'PATCH', 
-                self.url + "(BUBBLEID='"+ data['BUBBLEID'] + "',LOADTYPE=" + str(data['LOADTYPE']) + ")", 
-                headers=self.headers, 
-                body=json.dumps(self.patch) 
-            )
+            print("PATCHing to [{}] ... ".format(constants.oDataHost))        
+            purl = self.url + "(BUBBLEID='"+ data['BUBBLEID'] + "',LOADTYPE=" + str(data['LOADTYPE']) + ")"
+            ## print(purl)
+            c.request( 'PATCH', purl, headers=self.headers, body=json.dumps(self.patch) )
             res = c.getresponse()
-            if res.status != 200: # PATCHed
-                print("Error: {0}".format(res.status))
-                print(self.data)
-                print(res.read())
+            
+            ## TODO: error handling  
 
-        else:    
-            print("Error: {0}".format(res.status))
+        else:             
             print(self.data)
-            print(res.read())
