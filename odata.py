@@ -295,7 +295,7 @@ class Load:
 
                 for property, value in vars(self.configRows(path)).items():
                     if property == p:                   
-                        if PriDate.isDate(v):
+                        if value[0:3] == "INT" and PriDate.isDate(v):
                             self.odata[-1].oProps.append(oProp(value,PriDate.IntDate(v)))
                         else:
                             self.odata[-1].oProps.append(oProp(value,v))
