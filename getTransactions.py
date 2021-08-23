@@ -62,9 +62,14 @@ def main():
         c.request('GET', '/accounts/'+ accounts.data[0].id +'/transactions/?limit=1', headers=headers)                        
         
         l = odata.Load(
-            ltype = "TST",
+            ltype = "TST", ## The loading type identifier
             o = c.getresponse(), ## Object Data
-            c = "yapily.config" ## Config File
+            c = "yapily.config", ## Config File
+            ex = {
+                'meta',
+                'links',
+                'transactionInformation'
+            } ## excluded namespaces
         )  
         
         l.save('odata.json') ## Save to file
